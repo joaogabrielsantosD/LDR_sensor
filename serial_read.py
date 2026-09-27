@@ -8,6 +8,7 @@ from tkinter import ttk, scrolledtext, messagebox
 from datetime import datetime
 
 SERIAL_PORT = '/dev/ttyUSB0'
+# SERIAL_PORT = '/tmp/ttyV0' #
 BAUD_RATE = 9600
 LOGS_FOLDER = 'logs'
 
@@ -74,7 +75,7 @@ class SerialApplication:
         """Creates the CSV file in the logs folder with a header if it does not exist."""
         if not os.path.exists(full_path):
             with open(full_path, mode='w', newline='', encoding='utf-8') as file:
-                csv.writer(file).writerow(['timestamp', 'data'])
+                csv.writer(file).writerow(['timestamp', 'duty', 'led_raw', 'led_mv', 'ldr_raw', 'ldr_mv'])
 
     def change_filename(self):
         """Manually sets the target .csv filename."""

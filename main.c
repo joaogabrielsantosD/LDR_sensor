@@ -190,7 +190,7 @@ int main(void)
     sei();  // Enable Interrupt
 
 #ifdef LDR_MEASUREMENT
-    usart0_print("duty,led_raw,led_mv,ldr_raw,ldr_mv,\r\n");
+    // usart0_print("duty,led_raw,led_mv,ldr_raw,ldr_mv,\r\n");
 #else
     usart0_print("System ok\r\n");
 #endif
