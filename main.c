@@ -221,7 +221,7 @@ int main(void)
             break;
         }
 
-        _delay_ms(1);
+        _delay_ms(2000);
 #else
         if (received_frame)
         {

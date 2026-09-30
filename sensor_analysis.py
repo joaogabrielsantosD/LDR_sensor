@@ -5,8 +5,8 @@ import numpy as np
 import statistics as stats
 from collections import defaultdict
 
-INPUT_FILE = "logs/data_serial0.csv"
-OUTPUT_FILE = "results/duty_result.txt"
+INPUT_FILE = "logs/data_serial3.csv"
+OUTPUT_FILE = "results/duty_result3.txt"
 
 os.makedirs("results", exist_ok=True)
 
