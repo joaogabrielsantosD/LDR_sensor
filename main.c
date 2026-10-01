@@ -35,13 +35,12 @@
 typedef struct
 {
     uint8_t duty;
-#ifdef LDR_MEASUREMENT
+
     uint16_t led_raw;
     uint16_t led_mv;
 
     uint16_t ldr_raw;
     uint16_t ldr_mv;
-#endif
 } data_t;
 
 data_t data = {0};
@@ -166,7 +165,6 @@ static void log_status(const data_t *d)
 {
     usart0_print_num(d->duty);
     usart0_print(",");
-#ifdef LDR_MEASUREMENT
     usart0_print_num(d->led_raw);
     usart0_print(",");
     usart0_print_num(d->led_mv);
@@ -175,7 +173,6 @@ static void log_status(const data_t *d)
     usart0_print(",");
     usart0_print_num(d->ldr_mv);
     usart0_print(",");
-#endif
     usart0_print("\r\n");
 }
 
@@ -210,6 +207,11 @@ int main(void)
 
             log_status(&data);
         }
+
+        // if (data.duty < 16)
+        // {
+        //     data.duty++;
+        // }
 
         if (data.duty < 255)
         {

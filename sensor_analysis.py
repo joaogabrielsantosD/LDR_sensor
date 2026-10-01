@@ -7,6 +7,8 @@ from collections import defaultdict
 
 INPUT_FILE = "logs/data_serial3.csv"
 OUTPUT_FILE = "results/duty_result3.txt"
+KILO = 1000
+R2 = 120 * KILO
 
 os.makedirs("results", exist_ok=True)
 
@@ -120,14 +122,84 @@ def build_ldr_volt_values(result):
     return v
 
 
+def ldr_resistance_func(v):
+    return ((5 * R2) / (v)) - R2
+
+
+def build_ldr_resistance(result):
+    v = []
+    for row in result:
+        v.append(ldr_resistance_func(row['ldr_mv_mean'] / 1000))
+    return v
+
+
 def plot_voltage_graph(led, ldr):
     fig, ax = plt.subplots(figsize=(8, 5))
 
-    ax.plot(led, ldr, marker='o', linestyle='-', linewidth=2.0, color='b', label='LDR vs LED')
+    ax.scatter(led, ldr, color='b', label='Dados LDR vs LED', zorder=3)
+
+    if len(led) > 0:
+        # 1. Reta da origem (0,0) até o primeiro ponto experimental (led[0], ldr[0])
+        x_reta1 = [led[0], led[1]]
+        y_reta1 = [ldr[0], ldr[1]]
+        _m, _b = np.polyfit([led[0], led[1]], [ldr[0], ldr[1]], 1)
+        ax.plot(x_reta1, y_reta1, color='red', linestyle='--', linewidth=2.0, label=f'Ajuste 1 (y = {_m:.2f}x + {_b:.2f})')
+
+        # 2. Reta de ajuste (regressão linear) para os pontos restantes (do índice 1 em diante)
+        if len(led) > 1:
+            # Calcula a inclinação (m) e o ponto de intersecção (b) via Mínimos Quadrados
+            m, b = np.polyfit(led[1:], ldr[1:], 1)
+            
+            # Gera pontos no eixo X do 1º ponto até o valor máximo de led
+            x_reta2 = np.linspace(led[1], max(led), 100)
+            y_reta2 = m * x_reta2 + b
+            
+            ax.plot(x_reta2, y_reta2, color='green', linestyle='-', linewidth=2.0, 
+                    label=f'Ajuste 2 (y = {m:.2f}x + {b:.2f})')
 
     ax.set_title("LDR Voltage vs LED/PWM Voltage", fontsize=14, fontweight='bold')
     ax.set_xlabel("LED Voltage (V)", fontsize=12)
     ax.set_ylabel("LDR Voltage (V)", fontsize=12)
+
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='best')
+
+    max_x = max(led) if led else 5.0
+    max_y = max(ldr) if ldr else 5.0
+    ax.set_xlim(0, max(3.3, max_x * 1.1))
+    ax.set_ylim(0, max(3.3, max_y * 1.1))
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_resistance_graph(led, ldr):
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.scatter(led, ldr, color='b', label='Dados LDR(Ohm) vs LED', zorder=3)
+
+    if len(led) > 0:
+        # 1. Reta da origem (0,0) até o primeiro ponto experimental (led[0], ldr[0])
+        x_reta1 = [led[0], led[1]]
+        y_reta1 = [ldr[0], ldr[1]]
+        _m, _b = np.polyfit([led[0], led[1]], [ldr[0], ldr[1]], 1)
+        ax.plot(x_reta1, y_reta1, color='red', linestyle='--', linewidth=2.0, label=f'Ajuste 1 (y = {_m:.2f}x + {_b:.2f})')
+
+        # 2. Reta de ajuste (regressão linear) para os pontos restantes (do índice 1 em diante)
+        if len(led) > 1:
+            # Calcula a inclinação (m) e o ponto de intersecção (b) via Mínimos Quadrados
+            m, b = np.polyfit(led[1:], ldr[1:], 1)
+            
+            # Gera pontos no eixo X do 1º ponto até o valor máximo de led
+            x_reta2 = np.linspace(led[1], max(led), 100)
+            y_reta2 = m * x_reta2 + b
+            
+            ax.plot(x_reta2, y_reta2, color='green', linestyle='-', linewidth=2.0, 
+                    label=f'Ajuste 2 (y = {m:.2f}x + {b:.2f})')
+
+    ax.set_title("LDR Resistance vs LED/PWM Voltage", fontsize=14, fontweight='bold')
+    ax.set_xlabel("LED Voltage (V)", fontsize=12)
+    ax.set_ylabel("LDR Resistance (Ω)", fontsize=12)
 
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(loc='best')
@@ -157,4 +229,8 @@ if __name__ == "__main__":
     # print(led_volt)
     # print(ldr_volt)
 
+    ldr_resistance = build_ldr_resistance(result)
+    # print(ldr_resistance)
+
     plot_voltage_graph(led_volt, ldr_volt)
+    plot_resistance_graph(led_volt, ldr_resistance)
